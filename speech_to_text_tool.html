@@ -15,14 +15,30 @@
 <body class="bg-gray-50 text-gray-900 min-h-screen flex items-center justify-center px-4">
   <div class="max-w-2xl w-full bg-white rounded-xl shadow-xl p-8">
     <h1 class="text-3xl font-bold text-center text-primary mb-6">Speech to Text</h1>
-    <p class="text-center text-secondary mb-6">Click the button and start speaking. Your words will appear below in real-time.</p>
+    <p class="text-center text-secondary mb-6">Click the button and start speaking, upload an audio file, or download your transcript.</p>
 
+    <!-- Real-time Speech Recognition -->
     <div class="text-center mb-6">
       <button id="start-btn" class="bg-primary text-white px-6 py-3 rounded-lg text-lg font-medium hover:bg-blue-700 transition duration-300">
         🎤 Start Listening
       </button>
     </div>
 
+    <!-- File Upload -->
+    <div class="mb-6">
+      <label for="audio-upload" class="block text-sm font-medium text-gray-700 mb-2">Upload Audio File (.wav only)</label>
+      <input type="file" id="audio-upload" accept="audio/wav" class="block w-full text-sm text-gray-900 bg-gray-100 rounded-lg border border-gray-300 cursor-pointer">
+      <button id="upload-btn" class="mt-4 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">Transcribe File</button>
+    </div>
+
+    <!-- Download Button -->
+    <div class="mb-6 text-center">
+      <button id="download-btn" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition">
+        📥 Download as .txt
+      </button>
+    </div>
+
+    <!-- Transcription Output -->
     <div id="output" class="min-h-[150px] border border-gray-300 rounded-lg p-4 bg-gray-100 text-base leading-relaxed">
       <em class="text-gray-400">Your speech will appear here...</em>
     </div>
@@ -31,7 +47,11 @@
   <script>
     const startBtn = document.getElementById('start-btn');
     const output = document.getElementById('output');
+    const uploadBtn = document.getElementById('upload-btn');
+    const audioInput = document.getElementById('audio-upload');
+    const downloadBtn = document.getElementById('download-btn');
 
+    // Real-time Speech Recognition
     if (!('webkitSpeechRecognition' in window)) {
       output.innerHTML = '<span class="text-red-500">Your browser does not support speech recognition.</span>';
       startBtn.disabled = true;
@@ -62,6 +82,39 @@
         output.innerHTML += '<br><span class="text-gray-500">Recognition ended.</span>';
       };
     }
+
+    // File Upload Transcription (Mocked)
+    uploadBtn.addEventListener('click', () => {
+      const file = audioInput.files[0];
+      if (!file) {
+        output.innerHTML = '<span class="text-red-500">Please select a .wav file to transcribe.</span>';
+        return;
+      }
+
+      output.innerHTML = '<span class="text-blue-600">Transcribing file...</span>';
+      setTimeout(() => {
+        output.innerHTML = 'This is a placeholder transcription for the uploaded audio file. Replace this with actual backend logic.';
+      }, 2000);
+    });
+
+    // Download Transcription as .txt
+    downloadBtn.addEventListener('click', () => {
+      const text = output.innerText.trim();
+      if (!text || text.includes('Your speech will appear here')) {
+        alert('Nothing to download yet. Please transcribe something first.');
+        return;
+      }
+
+      const blob = new Blob([text], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'transcription.txt';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
   </script>
 </body>
 </html>
