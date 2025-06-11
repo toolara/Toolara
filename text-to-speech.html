@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Text to Speech - Toolora</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <style>
+    body { font-family: 'Poppins', sans-serif; background-color: #f9fbfe; color: #333; }
+    .tool-icon { background: linear-gradient(135deg, #3A86FF, #4CC9F0); }
+    .btn-primary { background-color: #3A86FF; }
+    .btn-primary:hover { background-color: #2a75e6; }
+    .btn-secondary { background-color: #f1f5f9; color: #333; }
+    .btn-secondary:hover { background-color: #e2e8f0; }
+  </style>
+</head>
+<body class="p-6 md:p-10">
+  <a href="index.html" class="text-primary mb-4 inline-block font-medium hover:underline">&larr; Back to Home</a>
+
+  <div class="max-w-2xl mx-auto bg-white shadow-lg rounded-xl p-6">
+    <div class="flex items-center mb-6">
+      <div class="tool-icon w-12 h-12 rounded-xl flex items-center justify-center text-white mr-4">🗣️</div>
+      <h1 class="text-2xl font-semibold text-text">Text to Speech + Download</h1>
+    </div>
+
+    <textarea id="textInput" rows="6" placeholder="Type your text here..." class="w-full p-4 rounded-lg border border-gray-200 shadow-inner mb-4 resize-none"></textarea>
+
+    <label for="voiceSelect" class="text-sm font-medium text-secondary">Choose Voice</label>
+    <select id="voiceSelect" class="w-full p-2 mt-1 mb-4 rounded-lg border border-gray-300">
+      <option value="">Loading voices…</option>
+    </select>
+
+    <div class="flex flex-wrap gap-4">
+      <button id="playBtn" class="btn-primary text-white px-6 py-2 rounded-lg">▶ Play</button>
+      <button id="downloadBtn" class="btn-secondary px-6 py-2 rounded-lg">⬇ Download MP3</button>
+    </div>
+
+    <audio id="audioPlayer" class="mt-4 w-full hidden controls"></audio>
+  </div>
+
+  <script>
+    gsap.from(".max-w-2xl", { y: 30, opacity: 0, duration: 0.6 });
+
+    const API_KEY = "sk_a88275a81b302a196bc7179f2dde75a9594fa0e2b0305b2d"; // Replace with your ElevenLabs API Key
+    const textInput = document.getElementById("textInput");
+    const voiceSelect = document.getElementById("voiceSelect");
+    const playBtn = document.getElementById("playBtn");
+    const downloadBtn = document.getElementById("downloadBtn");
+    const audioPlayer = document.getElementById("audioPlayer");
+
+    let allVoices = [];
+
+    const fallbackVoices = [
+      { voice_id: "21m00Tcm4TlvDq8ikWAM", name: "Rachel", language: "English" },
+      { voice_id: "MF3mGyEYCl7XYWbV9V6O", name: "Domi", language: "English" },
+      { voice_id: "AZnzlk1XvdvUeBnXmlld", name: "Antoni", language: "English" },
+      { voice_id: "CYw3kZ02Hs0563khs1Fj", name: "Prem", language: "Hindi" },
+      { voice_id: "AIkfO0l0klx3bHEqkAbB", name: "Sita", language: "Nepali" },
+      { voice_id: "LcfcDJNUP1GQjkzn1xUU", name: "Mimi", language: "Spanish" },
+      { voice_id: "ODq5zmih8GrVes37Dizd", name: "Léa", language: "French" },
+      { voice_id: "N4syoFqzGzA9EaO2zG3M", name: "Klaus", language: "German" },
+      { voice_id: "BsK7W6eYV0B8HtcOsiJG", name: "Ginevra", language: "Italian" },
+      { voice_id: "EXAVITQu4vr4xnSDxMaL", name: "Yuki", language: "Japanese" },
+      { voice_id: "z9DfU1BRVOUmYqPyCKs2", name: "Li Wei", language: "Chinese" },
+      { voice_id: "kHFo5A9XfC5vV6TcCYPK", name: "Nour", language: "Arabic" },
+      { voice_id: "jBpfuIE2acCO8z3wKNLl", name: "Isabela", language: "Portuguese" },
+      { voice_id: "8frHevoI7t6uPLg1nRUa", name: "Jihoon", language: "Korean" }
+    ];
+
+    async function loadVoices() {
+      try {
+        const res = await fetch("https://api.elevenlabs.io/v1/voices", {
+          headers: { "xi-api-key": API_KEY }
+        });
+        const data = await res.json();
+        allVoices = data.voices || fallbackVoices;
+        updateVoiceOptions();
+      } catch (error) {
+        console.warn("Failed to load voices. Using fallback.");
+        allVoices = fallbackVoices;
+        updateVoiceOptions();
+      }
+    }
+
+    function updateVoiceOptions() {
+      voiceSelect.innerHTML = "";
+      allVoices.forEach(v => {
+        const opt = document.createElement("option");
+        opt.value = v.voice_id;
+        opt.textContent = `${v.name} (${v.language || v.labels?.language || "Unknown"})`;
+        voiceSelect.appendChild(opt);
+      });
+    }
+
+    async function generateSpeech(download = false) {
+      const text = textInput.value.trim();
+      const voiceId = voiceSelect.value;
+      if (!text) return alert("Please enter some text.");
+      if (!voiceId) return alert("Please select a voice.");
+
+      const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "xi-api-key": API_KEY
+        },
+        body: JSON.stringify({
+          text: text,
+          model_id: "eleven_multilingual_v2",
+          voice_settings: { stability: 0.5, similarity_boost: 0.7 }
+        })
+      });
+
+      if (!res.ok) return alert("Failed to generate speech.");
+      const blob = await res.blob();
+      const audioURL = URL.createObjectURL(blob);
+
+      if (download) {
+        const a = document.createElement("a");
+        a.href = audioURL;
+        a.download = "speech.mp3";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      } else {
+        audioPlayer.src = audioURL;
+        audioPlayer.classList.remove("hidden");
+        audioPlayer.play();
+      }
+    }
+
+    playBtn.onclick = () => generateSpeech(false);
+    downloadBtn.onclick = () => generateSpeech(true);
+    window.onload = loadVoices;
+  </script>
+</body>
+</html>
