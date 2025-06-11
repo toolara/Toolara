@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Text Reverser - Toolora</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f9fafb;
+    }
+    .tool-container {
+      max-width: 720px;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center px-4">
+  <div class="tool-container w-full bg-white rounded-xl shadow-soft p-8">
+    <h1 class="text-3xl font-bold text-center text-primary mb-4">Text Reverser</h1>
+    <p class="text-center text-secondary mb-6">Type or paste your text and reverse it with one click.</p>
+
+    <label for="reverse-input" class="block text-sm font-medium text-text mb-2">Enter Text</label>
+    <textarea id="reverse-input" rows="5" class="w-full p-4 border border-gray-200 rounded-lg text-sm resize-none focus:ring-2 focus:ring-primary focus:outline-none shadow-soft mb-4" placeholder="Type or paste your text here..."></textarea>
+
+    <div class="flex flex-wrap gap-4 justify-center mb-6">
+      <button onclick="reverseText()" class="bg-[#3A86FF] text-white px-6 py-2 rounded-[8px] hover:bg-[#2a75e6] transition">🔁 Reverse Text</button>
+      <button onclick="clearText()" class="bg-red-500 text-white px-6 py-2 rounded-[8px] hover:bg-red-600 transition">🗑️ Clear</button>
+    </div>
+
+    <label for="reverse-output" class="block text-sm font-medium text-text mb-2">Reversed Output</label>
+    <textarea id="reverse-output" rows="5" class="w-full p-4 border border-gray-200 rounded-lg text-sm resize-none bg-gray-100 shadow-inner" readonly placeholder="Reversed text will appear here..."></textarea>
+  </div>
+
+  <script>
+    function reverseText() {
+      const input = document.getElementById('reverse-input').value;
+      const reversed = input.split('').reverse().join('');
+      document.getElementById('reverse-output').value = reversed;
+    }
+
+    function clearText() {
+      document.getElementById('reverse-input').value = '';
+      document.getElementById('reverse-output').value = '';
+    }
+  </script>
+</body>
+</html>
