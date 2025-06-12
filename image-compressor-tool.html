@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image Compressor - Toolora</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f9fafb;
+    }
+    .tool-container {
+      max-width: 720px;
+    }
+    .btn {
+      background-color: #0055FF;
+      color: #FFFFFF;
+      transition: transform 0.1s ease, box-shadow 0.1s ease;
+    }
+    .btn:hover {
+      transform: scale(1.03);
+      box-shadow: 0 4px 15px rgba(0, 85, 255, 0.3);
+    }
+    .btn-secondary {
+      background-color: #E0E7FF;
+      color: #0055FF;
+    }
+    .btn-secondary:hover {
+      background-color: #CAD8FF;
+    }
+  </style>
+</head>
+<body class="min-h-screen p-6 flex flex-col items-center">
+  <!-- Back to Home Button (Top Consistent Position) -->
+  <div class="w-full max-w-2xl mb-6">
+    <a href="index.html" class="btn-secondary py-2 px-4 rounded inline-block">← Back to Home</a>
+  </div>
+
+  <!-- Compressor Tool -->
+  <div class="tool-container w-full bg-white rounded-xl shadow-soft p-8">
+    <h1 class="text-3xl font-bold text-primary text-center mb-4">Image Compressor</h1>
+    <p class="text-secondary text-center mb-6">Upload an image and compress it for smaller file size while retaining quality.</p>
+
+    <input type="file" id="imageInput" accept="image/*" class="w-full mb-4 border p-2 rounded">
+    <canvas id="canvas" class="hidden"></canvas>
+
+    <div class="flex flex-wrap gap-4 justify-center mb-6">
+      <button id="compressBtn" class="btn px-6 py-2 rounded">📉 Compress Image</button>
+      <a id="downloadLink" href="#" download="compressed-image.jpg" class="btn-secondary px-6 py-2 rounded hidden">📥 Download</a>
+    </div>
+
+    <div id="preview" class="text-center"></div>
+  </div>
+
+  <script>
+    const imageInput = document.getElementById('imageInput');
+    const compressBtn = document.getElementById('compressBtn');
+    const downloadLink = document.getElementById('downloadLink');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const preview = document.getElementById('preview');
+    let image = new Image();
+
+    compressBtn.addEventListener('click', () => {
+      if (!imageInput.files.length) {
+        alert('Please upload an image.');
+        return;
+      }
+
+      const file = imageInput.files[0];
+      const reader = new FileReader();
+
+      reader.onload = e => {
+        image.onload = () => {
+          const MAX_WIDTH = 800;
+          const scaleSize = MAX_WIDTH / image.width;
+          const width = MAX_WIDTH;
+          const height = image.height * scaleSize;
+
+          canvas.width = width;
+          canvas.height = height;
+          ctx.clearRect(0, 0, width, height);
+          ctx.drawImage(image, 0, 0, width, height);
+
+          const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.6);
+          downloadLink.href = compressedDataUrl;
+          downloadLink.classList.remove('hidden');
+
+          preview.innerHTML = `<img src="${compressedDataUrl}" class="mx-auto rounded shadow mt-4" alt="Compressed Image">`;
+        };
+        image.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  </script>
+</body>
+</html>
