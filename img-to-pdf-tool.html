@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Image to PDF - Toolora</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    body { font-family: 'Inter', sans-serif; background: #F8FAFF; color: #1F2937; }
+    .btn {
+      background-color: #0055FF;
+      color: #FFFFFF;
+      transition: transform .1s, box-shadow .1s;
+    }
+    .btn:hover {
+      transform: scale(1.03);
+      box-shadow: 0 4px 15px rgba(0, 85, 255, 0.3);
+    }
+    .btn-secondary {
+      background-color: #E0E7FF;
+      color: #0055FF;
+    }
+    .btn-secondary:hover {
+      background-color: #CAD8FF;
+    }
+    .ripple {
+      position: relative;
+      overflow: hidden;
+    }
+    .ripple:after {
+      content: "";
+      display: block;
+      position: absolute;
+      background: rgba(255,255,255,0.5);
+      border-radius: 50%;
+      transform: scale(0);
+      opacity: 0;
+      transition: transform .5s, opacity 1s;
+    }
+    .ripple:active:after {
+      width: 200px; height: 200px;
+      transform: scale(1);
+      opacity: 1;
+      transition: 0s;
+      top: calc(var(--y) - 100px);
+      left: calc(var(--x) - 100px);
+    }
+  </style>
+</head>
+<body class="min-h-screen p-6 flex flex-col items-center">
+
+  <!-- Back to Home -->
+  <div class="w-full max-w-2xl mb-6">
+    <a href="index.html"
+       class="btn-secondary py-2 px-4 rounded inline-block ripple"
+       onclick="rippleCoords(event)">
+      ← Back to Home
+    </a>
+  </div>
+
+  <!-- Main Card -->
+  <div class="w-full max-w-2xl bg-white p-6 rounded-xl shadow">
+    <h1 class="text-2xl font-semibold text-center mb-4">Image → PDF Converter</h1>
+
+    <!-- Upload Input -->
+    <input id="imageInput" type="file" accept="image/*" multiple
+           class="w-full border p-3 rounded mb-6" />
+
+    <!-- Preview -->
+    <div id="preview" class="flex flex-wrap gap-4 mb-6"></div>
+
+    <!-- Buttons -->
+    <div class="flex flex-wrap justify-between gap-4">
+      <button id="convertBtn"
+              class="btn py-3 px-6 rounded ripple"
+              onclick="convertToPDF(); rippleCoords(event)">
+        📄 Convert & Download PDF
+      </button>
+      <button onclick="clearImages(); rippleCoords(event)" class="btn-secondary py-3 px-6 rounded ripple">
+        🗑️ Clear
+      </button>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script>
+    const preview = document.getElementById('preview');
+    const imageInput = document.getElementById('imageInput');
+    let images = [];
+
+    function rippleCoords(e) {
+      const btn = e.currentTarget;
+      btn.style.setProperty('--x', `${e.clientX - btn.offsetLeft}px`);
+      btn.style.setProperty('--y', `${e.clientY - btn.offsetTop}px`);
+    }
+
+    imageInput.addEventListener('change', () => {
+      preview.innerHTML = '';
+      images = Array.from(imageInput.files);
+      images.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = e => {
+          const img = document.createElement('img');
+          img.src = e.target.result;
+          img.className = "w-20 h-20 object-cover rounded shadow";
+          preview.appendChild(img);
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+
+    async function convertToPDF() {
+      if (!images.length) return alert("Upload at least one image.");
+
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF();
+
+      for (let i = 0; i < images.length; i++) {
+        const imgData = await new Promise(res => {
+          const reader = new FileReader();
+          reader.onload = () => res(reader.result);
+          reader.readAsDataURL(images[i]);
+        });
+
+        const img = new Image();
+        img.src = imgData;
+
+        await new Promise(resolve => {
+          img.onload = () => {
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = pdf.internal.pageSize.getHeight();
+            const imgAspectRatio = img.width / img.height;
+            let width = pdfWidth - 20;
+            let height = width / imgAspectRatio;
+            if (height > pdfHeight - 20) {
+              height = pdfHeight - 20;
+              width = height * imgAspectRatio;
+            }
+            const x = (pdfWidth - width) / 2;
+            const y = (pdfHeight - height) / 2;
+            if (i > 0) pdf.addPage();
+            pdf.addImage(img, 'JPEG', x, y, width, height);
+            resolve();
+          };
+        });
+      }
+
+      pdf.save("images.pdf");
+    }
+
+    function clearImages() {
+      imageInput.value = "";
+      preview.innerHTML = "";
+      images = [];
+    }
+  </script>
+</body>
+</html>
