@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>HTML Minifier - Toolara</title>
+  <meta name="description" content="Minify HTML code for production quickly and easily with Toolara's HTML Minifier tool." />
+
+  <!-- ✅ Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- ✅ Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#3A86FF',
+            accent: '#4CC9F0',
+            text: '#333333',
+            secondary: '#777777',
+          },
+          fontFamily: {
+            poppins: ['Poppins', 'sans-serif'],
+          },
+          boxShadow: {
+            soft: '0 4px 20px rgba(0, 0, 0, 0.08)',
+            softer: '0 6px 30px rgba(0, 0, 0, 0.1)',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #FFFFFF;
+      color: #333333;
+      scroll-behavior: smooth;
+    }
+    .nav-link::after {
+      content: '';
+      display: block;
+      width: 0;
+      height: 2px;
+      background: #4CC9F0;
+      transition: width 0.3s;
+    }
+    .nav-link:hover::after {
+      width: 100%;
+    }
+    textarea {
+      font-family: monospace;
+      font-size: 1rem;
+      resize: vertical;
+    }
+  </style>
+</head>
+<body class="font-poppins pt-20">
+
+  <!-- Navigation Bar -->
+  <nav class="bg-white shadow-soft py-4 px-4 md:px-8 fixed top-0 w-full z-50">
+    <div class="max-w-7xl mx-auto flex justify-between items-center">
+      <a href="/Toolara" class="text-2xl font-bold text-primary flex items-center">
+        <img src="TOOLARALOGO.png" class="h-[8vh] w-[6vw] mr-2 cover" alt="Toolara Logo" />
+      </a>
+
+      <div class="hidden md:flex space-x-8">
+        <a href="/Toolara" class="nav-link text-text font-medium hover:text-primary">Home</a>
+        <a href="#tools" class="nav-link text-text font-medium hover:text-primary">Tools</a>
+        <a href="#about" class="nav-link text-text font-medium hover:text-primary">About</a>
+        <a href="#contact" class="nav-link text-text font-medium hover:text-primary">Contact</a>
+      </div>
+
+      <button id="mobile-menu-button" class="md:hidden text-text">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+    </div>
+
+    <div id="mobile-menu" class="hidden md:hidden bg-white py-4 px-4 absolute left-0 right-0 top-16 shadow-lg">
+      <div class="flex flex-col space-y-4">
+        <a href="/Toolara" class="text-text font-medium hover:text-primary">Home</a>
+        <a href="#tools" class="text-text font-medium hover:text-primary">Tools</a>
+        <a href="#about" class="text-text font-medium hover:text-primary">About</a>
+        <a href="#contact" class="text-text font-medium hover:text-primary">Contact</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Tool Area -->
+  <main class="max-w-2xl mx-auto p-6 bg-white rounded shadow-lg mt-[5vw]">
+    <h2 class="text-3xl font-semibold mb-6">HTML Minifier</h2>
+    <p class="mb-4 text-secondary">Paste your HTML code below and click "Minify" to compress it for production use.</p>
+
+    <label for="inputHTML" class="block mb-2 font-medium">Input HTML Code</label>
+    <textarea id="inputHTML" rows="10" placeholder="Paste your HTML code here..." class="mb-4 block w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary"></textarea>
+
+    <button id="minifyBtn" class="bg-primary text-white px-6 py-3 rounded hover:bg-accent transition-all w-full sm:w-auto">
+      Minify
+    </button>
+
+    <label for="outputHTML" class="block mt-6 mb-2 font-medium">Minified HTML</label>
+    <textarea id="outputHTML" rows="10" readonly class="block w-full p-3 border border-gray-300 rounded bg-gray-50 text-sm"></textarea>
+
+    <button id="clearBtn" class="mt-4 bg-gray-300 text-gray-700 px-6 py-3 rounded hover:bg-gray-400 transition-all w-full sm:w-auto">
+      Clear
+    </button>
+  </main>
+
+  <!-- Footer -->
+  <footer class="mt-12 p-6 text-center text-sm text-gray-500">
+    &copy; 2025 Toolara. All rights reserved.
+  </footer>
+
+  <script>
+    // Mobile menu toggle
+    document.getElementById('mobile-menu-button').addEventListener('click', () => {
+      const menu = document.getElementById('mobile-menu');
+      menu.classList.toggle('hidden');
+    });
+
+    // GSAP Animations
+    gsap.from("h2", { duration: 1, y: -30, opacity: 0, ease: "power3.out" });
+    gsap.from("button", { duration: 1, y: 30, opacity: 0, delay: 0.5, ease: "power3.out", stagger: 0.2 });
+
+    // HTML minify function
+    function minifyHTML(html) {
+      return html
+        // Remove HTML comments except conditional comments for IE
+        .replace(/<!--(?!\[if).*?-->/gs, '')
+        // Remove whitespace between tags
+        .replace(/>\s+</g, '><')
+        // Collapse multiple spaces into one
+        .replace(/\s{2,}/g, ' ')
+        // Trim leading and trailing spaces
+        .trim();
+    }
+
+    const minifyBtn = document.getElementById('minifyBtn');
+    const inputHTML = document.getElementById('inputHTML');
+    const outputHTML = document.getElementById('outputHTML');
+    const clearBtn = document.getElementById('clearBtn');
+
+    minifyBtn.addEventListener('click', () => {
+      const rawHTML = inputHTML.value;
+      if (!rawHTML.trim()) {
+        alert('Please enter some HTML code to minify.');
+        return;
+      }
+      outputHTML.value = minifyHTML(rawHTML);
+    });
+
+    clearBtn.addEventListener('click', () => {
+      inputHTML.value = '';
+      outputHTML.value = '';
+      inputHTML.focus();
+    });
+  </script>
+</body>
+</html>
