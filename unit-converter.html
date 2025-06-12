@@ -1,0 +1,159 @@
+<!-- Full HTML document with Unit Converter tool -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Toolara - Unit Converter</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#3A86FF',
+            accent: '#4CC9F0',
+            text: '#333333',
+            secondary: '#777777',
+          },
+          fontFamily: {
+            poppins: ['Poppins', 'sans-serif'],
+          },
+          boxShadow: {
+            soft: '0 4px 20px rgba(0, 0, 0, 0.08)',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      scroll-behavior: smooth;
+    }
+    .nav-link::after {
+      content: '';
+      display: block;
+      width: 0;
+      height: 2px;
+      background: #4CC9F0;
+      transition: width 0.3s;
+    }
+    .nav-link:hover::after {
+      width: 100%;
+    }
+  </style>
+</head>
+<body class="font-poppins pt-20 bg-white text-text">
+
+  <!-- Navigation Bar -->
+  <nav class="bg-white shadow-soft py-4 px-4 md:px-8 fixed top-0 w-full z-50">
+    <div class="max-w-7xl mx-auto flex justify-between items-center">
+      <a href="/Toolara" class="text-2xl font-bold text-primary flex items-center">
+        <img src="TOOLARALOGO.png" class="h-[8vh] w-[6vw] mr-2 cover" />
+      </a>
+      <div class="hidden md:flex space-x-8">
+        <a href="/Toolara" class="nav-link text-text font-medium hover:text-primary">Home</a>
+        <a href="#tools" class="nav-link text-text font-medium hover:text-primary">Tools</a>
+        <a href="#about" class="nav-link text-text font-medium hover:text-primary">About</a>
+        <a href="#contact" class="nav-link text-text font-medium hover:text-primary">Contact</a>
+      </div>
+      <button id="mobile-menu-button" class="md:hidden text-text">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+    </div>
+    <div id="mobile-menu" class="hidden md:hidden bg-white py-4 px-4 absolute left-0 right-0 top-16 shadow-lg">
+      <div class="flex flex-col space-y-4">
+        <a href="/Toolara" class="text-text font-medium hover:text-primary">Home</a>
+        <a href="#tools" class="text-text font-medium hover:text-primary">Tools</a>
+        <a href="#about" class="text-text font-medium hover:text-primary">About</a>
+        <a href="#contact" class="text-text font-medium hover:text-primary">Contact</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Unit Converter Tool -->
+  <main class="max-w-2xl mx-auto p-6 bg-white rounded shadow-lg mt-[5vw]">
+    <h2 class="text-3xl font-semibold mb-6">Unit Converter</h2>
+    <p class="mb-4 text-secondary">Convert between different measurement units easily.</p>
+
+    <div class="flex flex-col gap-4">
+      <input type="number" id="inputValue" placeholder="Enter value" class="p-3 border border-gray-300 rounded w-full" />
+
+      <div class="flex flex-col sm:flex-row gap-4">
+        <select id="fromUnit" class="p-3 border border-gray-300 rounded w-full">
+          <option value="meters">Meters</option>
+          <option value="kilometers">Kilometers</option>
+          <option value="feet">Feet</option>
+          <option value="miles">Miles</option>
+        </select>
+
+        <select id="toUnit" class="p-3 border border-gray-300 rounded w-full">
+          <option value="meters">Meters</option>
+          <option value="kilometers">Kilometers</option>
+          <option value="feet">Feet</option>
+          <option value="miles">Miles</option>
+        </select>
+      </div>
+
+      <button id="convertBtn" class="bg-green-600 text-white px-6 py-3 rounded hover:bg-green-700 transition-all">
+        Convert
+      </button>
+
+      <div id="convertedResult" class="mt-4 text-xl font-semibold"></div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="mt-12 p-6 text-center text-sm text-gray-500">
+    &copy; 2025 Toolara. All rights reserved.
+  </footer>
+
+  <!-- Script -->
+  <script>
+    document.getElementById('mobile-menu-button').addEventListener('click', () => {
+      const menu = document.getElementById('mobile-menu');
+      menu.classList.toggle('hidden');
+    });
+
+    const conversionRates = {
+      meters: {
+        meters: 1,
+        kilometers: 0.001,
+        feet: 3.28084,
+        miles: 0.000621371
+      },
+      kilometers: {
+        meters: 1000,
+        kilometers: 1,
+        feet: 3280.84,
+        miles: 0.621371
+      },
+      feet: {
+        meters: 0.3048,
+        kilometers: 0.0003048,
+        feet: 1,
+        miles: 0.000189394
+      },
+      miles: {
+        meters: 1609.34,
+        kilometers: 1.60934,
+        feet: 5280,
+        miles: 1
+      }
+    };
+
+    document.getElementById('convertBtn').addEventListener('click', () => {
+      const value = parseFloat(document.getElementById('inputValue').value);
+      const fromUnit = document.getElementById('fromUnit').value;
+      const toUnit = document.getElementById('toUnit').value;
+      const result = value * conversionRates[fromUnit][toUnit];
+
+      document.getElementById('convertedResult').innerText = `${value} ${fromUnit} = ${result.toFixed(4)} ${toUnit}`;
+    });
+  </script>
+</body>
+</html>
